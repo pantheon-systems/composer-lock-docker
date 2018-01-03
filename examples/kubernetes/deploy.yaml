@@ -23,7 +23,7 @@ spec:
         app: composer-lock
     spec:
       containers:
-        - image: quay.io/getpantheon/composer-lock:latest
+        - image: quay.io/pantheon-public/composer-lock:latest
           imagePullPolicy: Always
           name: composer-lock
           ports:

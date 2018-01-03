@@ -1,4 +1,4 @@
-IMAGE := quay.io/getpantheon/composer-lock
+IMAGE := quay.io/pantheon-public/composer-lock
 TAG := latest
 
 all: build push ## build and push all versions
