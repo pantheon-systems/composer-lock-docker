@@ -1,0 +1,32 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: composer-lock
+  name: composer-lock
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: composer-lock
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: composer-lock
+    spec:
+      containers:
+        - image: quay.io/getpantheon/composer-lock:latest
+          imagePullPolicy: Always
+          name: composer-lock
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+      restartPolicy: Always
