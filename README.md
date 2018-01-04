@@ -9,7 +9,7 @@ uri. The result will be the updated contents of the `composer.lock` file.
 Supported endpoints:
 
 - `/update`: Runs a `composer update` on the provided `composer.json` file.
-- `/update&project=org/name:^1`: Runs `composer update` on the specified project(s) only.
+- `/update&project=org/name`: Runs `composer update` on the specified project(s) only.
 
 Upload files:
 
@@ -46,7 +46,7 @@ Run local
 Start container:
 
 ```
-$ docker run --rm -p 5000:5000 quay.io/getpantheon/composer-lock
+$ docker run --rm -p 5000:5000 quay.io/pantheon-public/composer-lock
  * Serving Flask app "main"
  * Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)
 ```
@@ -54,7 +54,14 @@ $ docker run --rm -p 5000:5000 quay.io/getpantheon/composer-lock
 Curl it:
 
 ```
-$ curl localhost:5000/update
+$ curl localhost:5000
+# Composer lock service running on 85d3082ca94f
+```
+
+Upload a `composer.json` to get a `composer.lock` back:
+
+```
+$ curl -F 'composer-json=@/path/to/project/composer.json' localhost:5000/update
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
@@ -67,29 +74,36 @@ $ curl localhost:5000/update
 ...
 ```
 
-Note: If you're on OSX, you need to run `docker-machine ip default` (assuming
-`default` is the name of your docker-machine instance) in order to get the IP
-of the docker VM instead of using `localhost`, example:
+Provide an existing lock file, and update just one project with its
+dependencies:
 
 ```
-$ docker-machine ip default
-192.168.99.100
-
-$ curl 192.168.99.100:5000/update
-...
-
-## or:
-
-$ curl $(docker-machine ip default):5000/update
+$ curl \
+  -F 'composer-json=@composer.json' \
+  -F 'composer-lock=@composer.lock' \
+  localhost:5000/update?project=org/name&with-dependencies=1
 ...
 ```
+
+If you want to know the exact IP address of the local docker image, you
+can use:
+
+`docker-machine ip default` 
+
+(assuming `default` is the name of your docker-machine instance)
+
+Use this if `localhost` does not work for local testing.
 
 Run on Kubernetes
 -----------------
-See `examples/kubernetes` directory for files. Customize to suit, then run:
+See `examples/kubernetes` directory for files. Customize to suit (optional), 
+then run:
 
 ```
 $ cd examples/kubernetes
 $ kubectl apply -f deploy.yaml
 $ kubectl apply -f service.yaml
+$ kubectl get services composer-lock
 ```
+
+Access the service via the address shown in the "External IP" column.
