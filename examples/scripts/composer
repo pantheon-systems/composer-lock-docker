@@ -1,0 +1,56 @@
+#!/bin/bash
+
+set -e
+
+# Get the fqdn for the composer lock service.
+SERVICE=${COMPOSER_LOCK_SERVICE:-composer-lock.sandbox-greg.gce.panth.io}
+
+# Determine the path to composer. If COMPOSER_BIN is not set,
+# then assume 'composer' on the $PATH will go to the correct script.
+COMPOSER_PATH=${COMPOSER_BIN:-composer}
+
+DO_UPDATE=false
+EXTRA_CURL_OPTIONS=
+
+# Parse options
+for arg in "$@" ; do
+  case "$arg" in
+    update)
+      DO_UPDATE=true
+      ;;
+
+    --prefer-source|--prefer-dist|--prefer-stable|--dev|--no-dev|--with-dependencies)
+      option=${arg:2}
+      EXTRA_CURL_OPTIONS=" -F '$option=1'"
+      ;;
+  esac
+done
+
+# Do the update operation
+if $DO_UPDATE ; then
+  TMP_OUTPUT_FILE=/tmp/composer-service-output
+  # First call the remote service to get our new composer.lock file
+  set +e
+  echo "Updating dependencies through composer-lock service $SERVICE"
+  echo curl -F 'composer-json=@composer.json' $EXTRA_CURL_OPTIONS $SERVICE/update
+  curl -F 'composer-json=@composer.json' $EXTRA_CURL_OPTIONS $SERVICE:5000/update > $TMP_OUTPUT_FILE
+  set -e
+
+  # Dump the output of the `composer update` if there was an error
+  status=$?
+  if [[ "$status" != "0" ]] ; then
+    cat /tmp/composer-service-output
+    exit $status
+  fi
+
+  # If there is no error, then copy the new composer lock and run
+  # `composer install`
+  cp $TMP_OUTPUT_FILE composer.lock
+
+  # TODO: maybe we want to pass through some options from the commandline here
+  "$COMPOSER_PATH" install
+  exit 0
+fi
+
+# Just call through to the ordinary composer executable
+"$COMPOSER_PATH" "$@"

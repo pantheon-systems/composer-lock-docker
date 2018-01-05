@@ -83,8 +83,18 @@ $ kubectl get services composer-lock
 
 Access the service via the address shown in the "External IP" column.
 
-Example usage
--------------
+Example client usage
+--------------------
+
+```
+$ export COMPOSER_LOCK_SERVICE = composer-lock.example.com
+$ alias composer=/path/to/composer-lock-docker/examples/scripts/composer
+
+$ composer update
+```
+
+Example service usage
+---------------------
 
 Upload a `composer.json` to get a `composer.lock` back:
 
