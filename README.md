@@ -16,7 +16,7 @@ Upload files:
 - Upload `composer-json` to supply the composer.json file (required).
 - Upload `composer-lock` to supply an initial lock file (optional).
 
-Additional flags to pass via curl:
+Additional flags may be provided via curl:
 
 - `prefer-source`
 - `prefer-dist`
@@ -31,6 +31,8 @@ The following options are assumed:
 - `--no-scripts`
 - `--no-interaction`
 - `--no-plugins`
+
+No other `composer` options may be set when using this service.
 
 Build & Push
 -------------
@@ -58,33 +60,6 @@ $ curl localhost:5000
 # Composer lock service running on 85d3082ca94f
 ```
 
-Upload a `composer.json` to get a `composer.lock` back:
-
-```
-$ curl -F 'composer-json=@/path/to/project/composer.json' localhost:5000/update
-{
-    "_readme": [
-        "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
-        "This file is @generated automatically"
-    ],
-    "content-hash": "c755802dc01c48c0f80de1866ba616c5",
-    "packages": [
-        {
-...
-```
-
-Provide an existing lock file, and update just one project with its
-dependencies:
-
-```
-$ curl \
-  -F 'composer-json=@composer.json' \
-  -F 'composer-lock=@composer.lock' \
-  localhost:5000/update?project=org/name&with-dependencies=1
-...
-```
-
 If you want to know the exact IP address of the local docker image, you
 can use:
 
@@ -107,3 +82,43 @@ $ kubectl get services composer-lock
 ```
 
 Access the service via the address shown in the "External IP" column.
+
+Example usage
+-------------
+
+Upload a `composer.json` to get a `composer.lock` back:
+
+```
+$ curl -F 'composer-json=@/path/to/project/composer.json' localhost:5000/update
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "c755802dc01c48c0f80de1866ba616c5",
+    "packages": [
+        {
+...
+```
+
+Pass the 'prefer-source' option:
+
+```
+$ curl -F 'composer-json=@composer.json' -F 'prefer-source=1' localhost:5000/update
+...
+```
+
+TODO: Provide an existing lock file, and update just one project with its
+dependencies:
+
+```
+$ curl \
+  -F 'composer-json=@composer.json' \
+  -F 'composer-lock=@composer.lock' \
+  -F 'project=org/name' \
+  -F 'with-dependencies=1' \
+  localhost:5000/update
+...
+```
+
