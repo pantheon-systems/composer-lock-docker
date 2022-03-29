@@ -1,6 +1,8 @@
 docker composer-lock service (flask app)
 ========================================
 
+[![Deprecated](https://img.shields.io/badge/Pantheon-Deprecated-yellow?logo=pantheon&color=FFDC28)](https://pantheon.io/docs/oss-support-levels#deprecated)
+
 Provides a "composer lock" service as a Python Flask app in a docker container.
 
 To use the service, upload a `composer.json` file to a specified endpoint
